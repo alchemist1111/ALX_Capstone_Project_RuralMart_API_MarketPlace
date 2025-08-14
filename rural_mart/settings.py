@@ -11,21 +11,30 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+from datetime import timedelta
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables
+load_dotenv() 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#=92ev(6d^=tjt_=xg&l&(sjcihf^$gz*ckw#imuf6^%x@+t3l'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ImproperlyConfigured("The SECRET_KEY setting must not be empty.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 
 # Application definition
@@ -129,3 +138,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model configuration
 AUTH_USER_MODEL = 'accounts.user'
+
+# Rest framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+
+# Simple JWT configuration
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=int(os.getenv('ACCESS_TOKEN_LIFETIME', 7))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=int(os.getenv('REFRESH_TOKEN_LIFETIME', 24))),
+    "ALGORITHM": os.getenv('JWT_ALGORITHM', 'HS256'),
+    "SIGNING_KEY": os.getenv('JWT_SIGNING_KEY'),
+    "AUTH_HEADER_TYPES": (os.getenv('AUTH_HEADER_TYPE', 'Bearer'),),
+}
