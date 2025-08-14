@@ -3,7 +3,10 @@ from .tokens import generate_tokens
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
+from .tokens import blacklist_token
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView
 from .serializers import UserRegistrationSerializer
@@ -80,3 +83,31 @@ class UserLoginView(APIView):
             status=status.HTTP_401_UNAUTHORIZED
         )
         
+        
+# Class for user logout
+class UserLogoutView(APIView):
+    """
+        Handles user logout.
+        - Blacklists the refresh token so it cannot be used for further authentication.
+    """      
+    # permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        """
+          Handle logout by blacklisting the refresh token.
+          
+        """
+        # Access the user's refresh token from the request
+        refresh_token = request.data.get('refresh')
+        
+        if not refresh_token:
+            return Response({'detail': 'Refresh token is required for logout.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Call the function to blacklist the refresh token
+        if blacklist_token(refresh_token):
+            return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Invalid refresh token or error blacklisting token.'}, status=status.HTTP_400_BAD_REQUEST)      
+             
+            
+         
