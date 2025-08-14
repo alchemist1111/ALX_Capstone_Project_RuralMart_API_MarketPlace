@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
+from .tokens import generate_tokens
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -57,13 +57,13 @@ class UserLoginView(APIView):
         
         if user is not None:
             # Create JWT tokens for the authenticated user
-            refresh = RefreshToken.for_user(user)
+            token = generate_tokens(user)
             
             # Return response with tokens and user details
             return Response(
                 {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
+                    'refresh': token['refresh'],
+                    'access': token['access'],
                     'user': {
                         'id': user.id,
                         'email': user.email,
