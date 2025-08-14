@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-# from django.contrib.auth.models import get_user_model
 from django.conf import settings
-
-# User = get_user_model() # Call the function to get user model defined
 
 # Class for the Base Custom User Manager
 class UserManager(BaseUserManager):
