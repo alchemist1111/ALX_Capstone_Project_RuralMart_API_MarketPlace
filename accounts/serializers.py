@@ -19,3 +19,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
         # fields = ['email', 'first_name', 'last_name', 'phone_number', 'roles', "password", "password2", "userprofile"]
         # extra_kwargs = {"roles": {"default": "buyer"}}
+        
+# User registration serializer
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'roles']        
