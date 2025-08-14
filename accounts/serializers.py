@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User, UserProfile
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 
 # User profile serializer
@@ -56,4 +57,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phone_number', 'roles', 'password']        
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'roles', 'password']  
+    
+    def create(self, validated_data):
+        """
+          Create and return a new user instance, with hashed password.
+        
+        """
+        password = password = validated_data.pop('password')  # Extract the password from validated data
+        user = User(**validated_data) # Create user object without saving to DB yet
+        user.set_password(password) # Hash the password for security
+        try:
+            user.save() # Save the user to the database
+        except Exception as e:
+            raise ValidationError(f"Error saving user: {e}")
+        return user # Return the user instance        
