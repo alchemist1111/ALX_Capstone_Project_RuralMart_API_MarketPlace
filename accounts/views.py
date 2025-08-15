@@ -4,13 +4,18 @@ from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from .tokens import blacklist_token
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import CreateAPIView
-from .serializers import UserRegistrationSerializer
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from .serializers import UserRegistrationSerializer, UserSerializer, UserUpdateSerializer, UserProfileSerializer
+from .permissions import IsAdminUser
+from .models import User, UserProfile
+from rest_framework import generics
 
+# User CRUD
 # Class for user registration
 class UserRegistrationView(CreateAPIView):
     """
@@ -90,7 +95,7 @@ class UserLogoutView(APIView):
         Handles user logout.
         - Blacklists the refresh token so it cannot be used for further authentication.
     """      
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     def post(self, request, *args, **kwargs):
         """
@@ -107,7 +112,87 @@ class UserLogoutView(APIView):
         if blacklist_token(refresh_token):
             return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
         else:
-            return Response({'detail': 'Invalid refresh token or error blacklisting token.'}, status=status.HTTP_400_BAD_REQUEST)      
+            return Response({'detail': 'Invalid refresh token or error blacklisting token.'}, status=status.HTTP_400_BAD_REQUEST)   
+
+
+
+# User list view
+class UserListView(ListAPIView):
+    """
+       List all users but only for admin users.
+    
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [IsAdminUser]
+    
+
+
+# User details view
+class UserDetailView(RetrieveAPIView):
+    """
+       Retrieve a single user by ID.
+    
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [IsAdminUser]
+    lookup_field = 'pk'
+
+# User update view
+class UserUpdateView(UpdateAPIView):
+    """
+      Update a user by ID.
+    
+    """
+    queryset = User.objects.all()
+    serializer_class = UserUpdateSerializer
+    # permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+    
+    def get_object(self):
+        """
+           A user to only update their own details.
+        """
+        user = super().get_object()
+        if user != self.request.user:
+            raise PermissionDenied("You can only update your own account.")
+        return user
+
+# User delete view
+class UserDeleteView(DestroyAPIView):
+    """
+      Delete a user by ID.
+    """ 
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [IsAuthenticated, IsAdminUser]  
+    lookup_field = 'pk'
+    
+# User profile [C]RUD
+# User profile list & create
+class UserProfileListView(generics.ListCreateAPIView):
+    """
+       List all user profiles or create a new profile.
+    """
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    # permission_classes = [IsAdminUser]
+    
+    def perform_create(self, serializer):
+        # Automatically associate the logged-in user with the profile when creating
+        serializer.save(user=self.request.user)
+        
+# User profile retrieve, update & delete
+class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+       Retrieve, update, or delete a user profile.
+    """ 
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    # permission_classes = [IsAdminUser]
+    lookup_field = 'pk'      
+            
              
             
          
