@@ -2,13 +2,18 @@ from rest_framework import serializers
 from .models import User, UserProfile
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+from rest_framework.serializers import HyperlinkedModelSerializer
+
+User = get_user_model()
 
 
 # User profile serializer
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(HyperlinkedModelSerializer):
+    user = serializers.HyperlinkedRelatedField(view_name='userprofile-detail', queryset=User.objects.all())
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = ['url', 'user', 'address', 'bio', 'created_at', 'updated_at']
         
         
 # User registration serializer
@@ -71,4 +76,62 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user.save() # Save the user to the database
         except Exception as e:
             raise ValidationError(f"Error saving user: {e}")
-        return user # Return the user instance        
+        return user # Return the user instance
+    
+# User update serializer
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+       Serializer for updating user details.
+       
+    """
+    password = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True,
+        validators=[validate_password],
+        help_text="Leave blank if you don't want to change the password."
+    )
+    
+    class Meta:
+        model = User
+        fields = [ 
+            'first_name', 
+            'last_name',
+            'email',
+            'phone_number',
+            'roles', 
+            'password', 
+            'is_staff', 
+            'is_active'
+        ]
+        extra_kwags = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'email': {'required': False},
+            'phone_number': {'required': False},
+            'roles': {'required': False},
+            'is_staff': {'required': False},
+            'is_active': {'required': False} 
+        }
+        
+        def validate_email(self, value):
+             """
+               Validate the email field to ensure no duplicates (if the email is updated).
+             """
+             if User.objects.exclude(pk=self.instance.pk).filter(email=value).exists():
+                 raise ValidationError("A user with this email already exists.")
+             return value
+        
+        def update(self, instance, validated_data):
+            """
+               Custom update method to handle password changes and other updates.
+            """
+            password = validated_data.pop('password', None)
+            for attr, value in validated_data.items():
+                 setattr(instance, attr, value)           
+                 
+            if password:
+                instance.set_password(password) 
+            
+            instance.save()
+            return instance        
