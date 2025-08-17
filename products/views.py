@@ -1,14 +1,30 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Product, Category, Cart, CartItem
 from .serializers import ProductSerializer, CategorySerializer, CartSerializer, CartItemSerializer
+from .filters import ProductFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Product viewset
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
+    
+    # Filter backends
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    
+    # Custom filterset
+    filterset_class = ProductFilter
+    
+    # Search set up
+    search_fields = ['name', 'description']
+    
+    # Ordering set up
+    ordering_fields = ['price', 'name', 'created_at']
+    ordering = ['name']
+    
     
     
 # Category viewset
