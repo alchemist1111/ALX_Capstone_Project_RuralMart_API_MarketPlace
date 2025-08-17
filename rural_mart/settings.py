@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # My apps
     'accounts',
     'products',
+    'orders',
     
     #Third party apps
     'rest_framework_simplejwt',
