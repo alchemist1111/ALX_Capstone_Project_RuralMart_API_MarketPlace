@@ -1,9 +1,17 @@
 from django.db import models
+from django.conf import settings
 
 
 # Category model to represent product categories
 class Category(models.Model):
     name = models.CharField(max_length=100, db_index=True)
+    parent_category = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='subcategories'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -26,7 +34,7 @@ class Product(models.Model):
     
 # Cart model to store shopping cart
 class Cart(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

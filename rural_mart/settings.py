@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # My apps
     'accounts',
+    'products',
     
     #Third party apps
     'rest_framework_simplejwt',

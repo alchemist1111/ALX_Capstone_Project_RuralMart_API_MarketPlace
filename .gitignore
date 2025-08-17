@@ -168,6 +168,10 @@ cython_debug/
 # secret key generation file
 generate_jwt_key.py
 
+# Images
+product_images
+
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

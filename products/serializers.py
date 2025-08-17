@@ -12,7 +12,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 # Product serializer
 class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
 
     class Meta:
         model = Product
@@ -35,8 +35,8 @@ class CartSerializer(serializers.ModelSerializer):
         
 # CartItem Serializer
 class CartItemSerializer(serializers.ModelSerializer):
-    cart = serializers.PrimaryKeyRelatedField(queryset=Cart.objects.all(), read_only=True) # Nested cart serializer
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), read_only=True) # Nested product serializer
+    cart = serializers.PrimaryKeyRelatedField(read_only=True) # Nested cart serializer
+    product = serializers.PrimaryKeyRelatedField(read_only=True) # Nested product serializer
     quantity = serializers.IntegerField(min_value=1) # Quantity should always be positive integer
     
     class Meta:
