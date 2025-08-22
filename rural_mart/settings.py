@@ -159,3 +159,8 @@ SIMPLE_JWT = {
     "SIGNING_KEY": os.getenv('JWT_SIGNING_KEY'),
     "AUTH_HEADER_TYPES": (os.getenv('AUTH_HEADER_TYPE', 'Bearer'),),
 }
+
+
+# Paystack configuration
+PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
