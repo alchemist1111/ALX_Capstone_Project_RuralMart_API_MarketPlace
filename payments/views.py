@@ -3,6 +3,10 @@ from rest_framework.response import Response
 from .models import Payment, Transaction, PaymentMethod
 from .serializers import PaymentSerializer, TransactionSerializer
 from orders.models import Order
+from .paystack_service import initialize_payment
+from .paystack_service import verify_payment
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 # Create payment view
 class CreatePaymentView(APIView):
@@ -12,19 +16,37 @@ class CreatePaymentView(APIView):
         user = request.user
         payment_method_id = data.get('payment_method_id')
         
+        if not order_id or not payment_method_id:
+           return Response({'error': 'order_id and payment_method_id are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             order = Order.objects.get(id=order_id, user=user)
-            payment_method = payment_method.objects.get(id=payment_method_id)
+            payment_method = PaymentMethod.objects.get(id=payment_method_id)
             
-            payment = Payment.objects.create(
+            # Initialize payment with Paystack
+            try:
+                payment = initialize_payment(order.total_amount, user.email, order_id)
+                if 'error' in payment:
+                    return Response({'error': payment['error']}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({'error': f'Payment initialization failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)    
+            
+            payment_record = Payment.objects.create(
                 user=user,
                 order=order,
                 amount=order.total_amount,
                 payment_method=payment_method,
+                status='pending',
+                payment_gateway='paystack',
+                transaction_reference=payment['data']['reference']
             )
-            # Serialize the payment and return the response
-            payment_serializer = PaymentSerializer(payment)
-            return Response(payment_serializer.data, status=status.HTTP_201_CREATED)
+            # Return the URL to redirect the user for payment
+            return Response({
+                'authorization_url': payment['data']['authorization_url'],
+                'transaction_reference': payment['data']['reference'],
+                'payment_id': payment_record.id
+            }, status=status.HTTP_201_CREATED)
+            
         except Order.DoesNotExist:
             return Response({'error': 'Order not found or does not belong to the user.'}, status=status.HTTP_404_NOT_FOUND)
         except PaymentMethod.DoesNotExist:
@@ -37,30 +59,38 @@ class ProcessPaymentView(APIView):
         data = request.data
         payment_id = data.get('payment_id')
         transaction_reference = data.get('transaction_reference')
-        payment_gateway = data.get('payment_gateway')
-        amount = data.get('amount')
         
         try:
             payment = Payment.objects.get(id=payment_id, user=request.user)
-            # I will implement payment integration here later
-            # For now, let's assume the payment is always successful
             
-            # Create a transaction record
-            transaction = Transaction.objects.create(
-                payment=payment,
-                transaction_id=transaction_reference,
-                amount=payment.amount,
-                status='completed', # assuming success for now
-                payment_gateway_response={'message': 'Payment processed successfully'} # mock response
-            )
+            # Verify the payment with Paystack
+            verification_response = verify_payment(transaction_reference)
             
-            # Update payment status
-            payment.status = 'completed'
-            payment.save() 
+            if 'error' in verification_response:
+                return Response({'error': verification_response['error']}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Serialize and return the transaction response
-            transaction_serializer = TransactionSerializer(transaction)
-            return Response(transaction_serializer.data, status=status.HTTP_200_OK)
+               # If payment is successful
+            if verification_response['data']['status'] == 'success':
+                # Update the payment status
+                payment.status = 'completed'
+                payment.save()
+            
+                # Create a transaction record
+                transaction = Transaction.objects.create(
+                    payment=payment,
+                    transaction_id=transaction_reference,
+                    amount=payment.amount,
+                    status='completed',
+                    payment_gateway_response=verification_response
+                )
+            
+                # Serialize and return the transaction response
+                transaction_serializer = TransactionSerializer(transaction)
+                return Response(transaction_serializer.data, status=status.HTTP_200_OK)
+            else:
+                payment.status = 'failed'
+                payment.save()
+                return Response({'error': 'Payment verification failed.'}, status=status.HTTP_400_BAD_REQUEST)
         except Payment.DoesNotExist:
             return Response({'error': 'Payment not found.'}, status=status.HTTP_404_NOT_FOUND) 
 
@@ -75,4 +105,33 @@ class PaymentStatusView(APIView):
             payment_serializer = PaymentSerializer(payment)
             return Response(payment_serializer.data, status=status.HTTP_200_OK)
         except Payment.DoesNotExist:
-            return Response({"detail": "Payment not found."}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({"error": "Payment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+# Webhook for Paystack to notify your server of payment events
+@method_decorator(csrf_exempt, name='dispatch')
+class PayStackWebhookView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Extract relevant data from the request payload
+        payment_reference = request.data.get('data', {}).get('reference')
+        payment_status = request.data.get('data', {}).get('status')
+        
+        if not payment_reference or not payment_status:
+            return Response({'error': 'Invalid webhook data'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Find the payment record using the reference
+            payment = Payment.objects.get(transaction_reference=payment_reference)
+            
+            # Update the payment status based on Paystack's response
+            if payment_status == 'success':
+                payment.status = 'completed'
+            elif payment_status == 'failed':
+                payment.status = 'failed'
+            else:
+                payment.status = 'pending'
+            
+            payment.save()
+            
+            return Response({'message': 'Payment status updated successfully.'}, status=status.HTTP_200_OK)
+        except Payment.DoesNotExist:
+            return Response({'error': 'Payment not found.'}, status=status.HTTP_404_NOT_FOUND)             
