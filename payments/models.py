@@ -6,11 +6,17 @@ User = get_user_model()
 
 # Payment method model
 class PaymentMethod(models.Model):
+    CATEGORY_CHOICES = [
+        ('card', 'Card'),
+        ('mobile_money', 'Mobile Money'),
+        ('bank_transfer', 'Bank Transfer'),
+    ]
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='card')
     
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.category})"
     
 # Payment model
 class Payment(models.Model):

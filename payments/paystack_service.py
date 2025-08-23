@@ -1,8 +1,8 @@
-import paystack
+from paystackapi.paystack import Paystack
 from django.conf import settings
 
 # Initialize Paystack API with the secret key
-paystack_api = paystack.Paystack(secret_key=settings.PAYSTACK_SECRET_KEY)
+paystack_api = Paystack(secret_key=settings.PAYSTACK_SECRET_KEY)
 
 # Verify payment
 def verify_payment(transaction_reference):
@@ -10,7 +10,7 @@ def verify_payment(transaction_reference):
         # Call Paystack to verify the payment status
         verification = paystack_api.transaction.verify(transaction_reference)
         return verification
-    except paystack.exceptions.PaystackError as e:
+    except Paystack.exceptions.PaystackError as e:
         return {"error": str(e)}
 
 
@@ -24,5 +24,5 @@ def initialize_payment(email, amount, order_id):
             order_id=order_id
         )
         return payment
-    except paystack.exceptions.PaystackError as e:
+    except Paystack.exceptions.PaystackError as e:
         return {"error": str(e)}        

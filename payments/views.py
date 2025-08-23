@@ -1,7 +1,8 @@
-from rest_framework import APIView, status
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Payment, Transaction, PaymentMethod
-from .serializers import PaymentSerializer, TransactionSerializer
+from .serializers import PaymentSerializer, TransactionSerializer, PaymentMethodSerializer
 from orders.models import Order
 from .paystack_service import initialize_payment
 from .paystack_service import verify_payment
@@ -11,6 +12,10 @@ from django.utils.decorators import method_decorator
 # Create payment view
 class CreatePaymentView(APIView):
     def post(self, request, *args, **kwargs):
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        
         data = request.data
         order_id = data.get('order_id')
         user = request.user
@@ -134,4 +139,28 @@ class PayStackWebhookView(APIView):
             
             return Response({'message': 'Payment status updated successfully.'}, status=status.HTTP_200_OK)
         except Payment.DoesNotExist:
-            return Response({'error': 'Payment not found.'}, status=status.HTTP_404_NOT_FOUND)             
+            return Response({'error': 'Payment not found.'}, status=status.HTTP_404_NOT_FOUND) 
+
+
+# Payment method view
+class PaymentMethodView(APIView):
+    def get(self, request, *args, **kwargs):
+        # Ensure the user is authenticated and fetch only their payment methods
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        payment_methods = PaymentMethod.objects.filter(user=request.user)
+        serializer = PaymentMethodSerializer(payment_methods, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        # Ensure the user is authenticated
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Add the user to the data before saving
+        data = request.data
+        serializer = PaymentMethodSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                    
