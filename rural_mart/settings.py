@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'products',
     'orders',
     'payments',
+    'reviews',
     
     #Third party apps
     'rest_framework_simplejwt',
