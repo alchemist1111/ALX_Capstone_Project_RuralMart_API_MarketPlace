@@ -5,6 +5,11 @@ from .models import Product, Category, Cart, CartItem
 from .serializers import ProductSerializer, CategorySerializer, CartSerializer, CartItemSerializer
 from .filters import ProductFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
+
+# Home view
+def home(request):
+    return HttpResponse("Welcome to the homepage!")
 
 # Product viewset
 class ProductViewSet(viewsets.ModelViewSet):
