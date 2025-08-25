@@ -1,7 +1,7 @@
 # Run migrations before the app starts
-# release: |
-#   python manage.py makemigrations --no-input
-#   python manage.py migrate --no-input
+release: |
+  python manage.py makemigrations --no-input
+  python manage.py migrate --no-input
 
 # Start the app using gunicorn
 web: gunicorn rural_mart.wsgi:application
