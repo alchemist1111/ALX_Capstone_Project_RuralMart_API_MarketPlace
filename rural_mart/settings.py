@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'storages',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'rural_mart.urls'
@@ -176,3 +179,8 @@ SIMPLE_JWT = {
 # Paystack configuration
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
+
+
+# CORS configuration
+CORS_ALLOWED_ORIGINS = os.getenv('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',')
+
