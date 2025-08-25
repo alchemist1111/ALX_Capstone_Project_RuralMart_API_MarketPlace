@@ -9,7 +9,7 @@ router.register(r'carts', CartViewSet)
 router.register(r'cart-items', CartItemViewSet)
 
 urlpatterns = [
-    path('', home, name='home'),
+    path('/', home, name='home'),
     path('favicon.ico/', favicon_view),
     path('', include(router.urls)),
 ]
