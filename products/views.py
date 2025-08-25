@@ -11,6 +11,10 @@ from django.http import HttpResponse
 def home(request):
     return HttpResponse("Welcome to the homepage!")
 
+# Favicon view
+def favicon_view(request):
+    return HttpResponse(status=204)  # No Content response for favicon requests
+
 # Product viewset
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
