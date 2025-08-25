@@ -4,4 +4,4 @@ release: |
   python manage.py migrate --no-input
 
 # Start the app using gunicorn
-web: gunicorn ALX-Capstone-Project-RuralMart-API-MarketPlace.rural_mart.wsgi:application
+web: gunicorn rural_mart.wsgi:application
