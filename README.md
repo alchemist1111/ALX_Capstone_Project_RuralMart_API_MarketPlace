@@ -204,6 +204,3 @@ We welcome contributions! To contribute to this project:
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ```
-
-This version correctly formats your code blocks in Markdown. I made sure all sections, including bash commands and code blocks, are enclosed in the right backticks, and there are no open-ended or missing code block closures. Let me know if you need anything else!
-```
