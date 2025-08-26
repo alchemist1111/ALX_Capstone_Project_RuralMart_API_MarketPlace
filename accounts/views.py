@@ -1,6 +1,6 @@
 from rest_framework import status
 from .tokens import generate_tokens
-from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
@@ -12,8 +12,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from .serializers import UserRegistrationSerializer, UserSerializer, UserUpdateSerializer, UserProfileSerializer
 from .permissions import IsAdminUser
-from .models import User, UserProfile
+from .models import UserProfile
 from rest_framework import generics
+from django.contrib.auth import get_user_model  
+
+User = get_user_model()
 
 # User CRUD
 # Class for user registration
@@ -59,11 +62,18 @@ class UserLoginView(APIView):
         if not email or not password:
             raise ValidationError("Email and password are required fields.")
             
+        try:
+            # Get the user by email
+            user = User.objects.get(email=email)   
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)    
         
-        # Authenticate user
-        user = authenticate(request, email=email, password=password)
+        # Check the password manually
+        if not user.check_password(password):
+            return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        if user is not None:
+        # Generate the tokens for the authenticated user
+        if user and check_password(password, user.password):
             # Create JWT tokens for the authenticated user
             token = generate_tokens(user)
             
@@ -92,27 +102,26 @@ class UserLoginView(APIView):
 # Class for user logout
 class UserLogoutView(APIView):
     """
-        Handles user logout.
-        - Blacklists the refresh token so it cannot be used for further authentication.
+    Handles user logout.
+    - Blacklists the refresh token so it cannot be used for further authentication.
     """      
     permission_classes = [IsAuthenticated]
     
     def post(self, request, *args, **kwargs):
         """
-          Handle logout by blacklisting the refresh token.
-          
+        Handle logout by blacklisting the refresh token.
         """
         # Access the user's refresh token from the request
         refresh_token = request.data.get('refresh')
         
         if not refresh_token:
-            return Response({'detail': 'Refresh token is required for logout.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Refresh token is required for logout.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Call the function to blacklist the refresh token
         if blacklist_token(refresh_token):
             return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
         else:
-            return Response({'detail': 'Invalid refresh token or error blacklisting token.'}, status=status.HTTP_400_BAD_REQUEST)   
+            return Response({'error': 'Invalid refresh token or error blacklisting token.'}, status=status.HTTP_400_BAD_REQUEST)   
 
 
 
