@@ -202,5 +202,3 @@ We welcome contributions! To contribute to this project:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-```
