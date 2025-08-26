@@ -1,6 +1,7 @@
 from django.test import TestCase
-from accounts.models import User
+from accounts.models import User, UserProfile
 
+# Test cases for the custom User model
 class UserModelTestCase(TestCase):
     def test_create_user(self):
         # Test creating a regular user
@@ -59,4 +60,78 @@ class UserModelTestCase(TestCase):
             password='Password123'
         )
         self.assertEqual(user.roles, 'vendor')
+
+
+# Test cases for the user profile model
+class UserProfileModelTestCase(TestCase):
+    # Create a user
+    def setUp(self):
+        self.user = User.objects.create_user(
+            first_name='Test',
+            last_name='User',
+            email='testuser@gmail.com',
+            phone_number='1234567894',
+            roles='buyer',
+            password='Password123'
+        )
+        # Ensure only one profile exists for the user
+        self.profile, created = UserProfile.objects.get_or_create(
+            user=self.user,
+            defaults={'address': '123 Test St, Test City', 'bio': 'This is a test bio.'}
+        )
+        if not created:
+            self.profile.address = '123 Test St, Test City'
+            self.profile.bio = 'This is a test bio.'
+            self.profile.save()
+    
+    def test_create_user_profile(self):
+        # Check if the UserProfile is correctly created
+        self.assertEqual(self.profile.user, self.user)
+        self.assertEqual(self.profile.address, '123 Test St, Test City')
+        self.assertEqual(self.profile.bio, 'This is a test bio.')
+    
+    def test_profile_str_method(self):
+        # Check if the __str__ method is correct
+        self.assertEqual(str(self.profile), f"Profile of {self.user.first_name} {self.user.last_name}")
+    
+    def test_user_profile_relation(self):
+        # Ensure the user has a user profile
+        self.assertTrue(hasattr(self.user, 'userprofile'))
+
+# # Test cases for the relationship between User and UserProfile
+# class UserProfileRelationTestCase(TestCase):
+
+#     def setUp(self):
+#         # Create a user and their profile
+#         self.user = User.objects.create_user(
+#             email='user@example.com',
+#             password='password123',
+#             first_name='John',
+#             last_name='Doe',
+#             phone_number='+254700000000',
+#             roles='buyer'
+#         )
+#         self.profile = UserProfile.objects.create(
+#             user=self.user,
+#             address="Test Address",
+#             bio="Test Bio"
+#         )
+
+#     def test_user_profile_association(self):
+#         # Ensure a profile is created for the user
+#         self.assertEqual(self.profile.user, self.user)
+
+#     def test_user_profile_creation_on_user_creation(self):
+#         # Ensure that when the user is created, a profile is created for them
+#         user = User.objects.create_user(
+#             email='newuser@example.com',
+#             password='password123',
+#             first_name='Jane',
+#             last_name='Doe',
+#             phone_number='+254700000001',
+#             roles='vendor'
+#         )
+#         self.assertTrue(hasattr(user, 'userprofile'))
+
+        
         
