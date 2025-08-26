@@ -16,19 +16,11 @@ def generate_tokens(user):
     
 # Function to blacklist token
 def blacklist_token(refresh_token):
-    """
-        Blacklist the provided refresh token.
-        This ensures that the refresh token cannot be used to get new access tokens.
-        
-    """ 
     try:
-        # Create the refresh token instance from the provided refresh token
-        token = RefreshToken(refresh_token)
-        
-        # Blacklist the refresh token
-        token.blacklist()
-        
-        return True  # Successfully blacklisted the token
+        # Create a new BlacklistedToken entry with the refresh token
+        BlacklistedToken.objects.create(token=refresh_token)
+        return True
     except Exception as e:
+        # Log the error for debugging
         print(f"Error blacklisting token: {str(e)}")
-        return False   
+        return False
