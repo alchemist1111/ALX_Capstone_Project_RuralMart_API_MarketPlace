@@ -6,7 +6,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import PermissionDenied
 from rest_framework.views import APIView
-from rest_framework_simplejwt.exceptions import TokenError
 from .tokens import blacklist_token
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
@@ -52,6 +51,7 @@ class UserLoginView(APIView):
         - Returns JWT tokens (access and refresh tokens) on successful login.
     """
     permission_classes = [AllowAny]
+    serializer_class = UserSerializer
     
     def post(self, request, *args, **kwargs):
         # Extract email and password from request data
@@ -106,6 +106,7 @@ class UserLogoutView(APIView):
     - Blacklists the refresh token so it cannot be used for further authentication.
     """      
     permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
     
     def post(self, request, *args, **kwargs):
         """

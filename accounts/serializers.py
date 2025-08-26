@@ -25,24 +25,14 @@ class UserSerializer(serializers.ModelSerializer):
     
     """
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
-    password2 = serializers.CharField(write_only=True, style={"input_type": "password"})
     userprofile = UserProfileSerializer(required=False)
     
     class Meta:
         model = User
         # fields = '__all__'
-        fields = ['email', 'first_name', 'last_name', 'phone_number', 'roles', "password", "password2", "userprofile"]
+        fields = ['email', 'first_name', 'last_name', 'phone_number', 'roles', "password", "userprofile"]
         extra_kwargs = {"roles": {"default": "buyer"}}
     
-    def validate(self, data):
-        """
-           Ensuring that the two password fields match and validate password strength.
-           
-        """
-        if data['password'] != data['password2']:
-            raise serializers.ValidationError('Passwords do not match.')
-        validate_password(data['password'])
-        return data
     
     def create(self, validated_data):
         """
