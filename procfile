@@ -2,6 +2,8 @@
 release: |
   python manage.py makemigrations --no-input
   python manage.py migrate --no-input
+  python manage.py collectstatic --no-input --clear
+  python manage.py runserver
 
 # Start the app using gunicorn
 web: gunicorn rural_mart.wsgi:application
