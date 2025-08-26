@@ -209,7 +209,17 @@ CORS_ALLOWED_METHODS = [
     'PATCH',
     'DELETE',
 ]
-CSRF_TRUSTED_ORIGINS = ['*']
+
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://example.com',
+    'https://www.example.com',
+    'https://your-domain.com',
+    'https://localhost:8000',
+    'http://localhost:8000',  # Local testing
+    'http://127.0.0.1:8000',
+    'https://alx-capstone-project-ruralmart-api-p5oh.onrender.com',
+]
 
 # Proxy and SSL settings 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
