@@ -35,7 +35,7 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["ruralmart.pythonanywhere.com", "database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com"]
 
 
 # Application definition
@@ -220,6 +220,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',  # Local testing
     'http://127.0.0.1:8000',
     'https://alx-capstone-project-ruralmart-api-p5oh.onrender.com',
+    'database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com',
+    'ruralmart.pythonanywhere.com',
 ]
 
 # Proxy and SSL settings 
