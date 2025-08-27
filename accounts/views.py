@@ -28,7 +28,7 @@ class UserRegistrationView(CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
     
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """
           Handles the POST request to register a new user.
           

@@ -35,7 +35,12 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-ALLOWED_HOSTS = ["ruralmart.pythonanywhere.com", "database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com"]
+ALLOWED_HOSTS = [
+    "ruralmart.pythonanywhere.com", 
+    "database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com", 
+    'localhost',
+    '127.0.0.1',
+    ]
 
 
 # Application definition
