@@ -108,6 +108,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {
+            'sql_mode': 'STRICT_TRANS_TABLES',
+        },
     }
 }
 
@@ -220,8 +223,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',  # Local testing
     'http://127.0.0.1:8000',
     'https://alx-capstone-project-ruralmart-api-p5oh.onrender.com',
-    'database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com',
-    'ruralmart.pythonanywhere.com',
+    'https://database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com',
+    'https://ruralmart.pythonanywhere.com',
 ]
 
 # Proxy and SSL settings 
@@ -236,4 +239,6 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }
+
+
 
