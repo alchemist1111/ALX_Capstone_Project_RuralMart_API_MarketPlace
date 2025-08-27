@@ -51,7 +51,6 @@ class UserLoginView(APIView):
         - Returns JWT tokens (access and refresh tokens) on successful login.
     """
     permission_classes = [AllowAny]
-    serializer_class = UserSerializer
     
     def post(self, request, *args, **kwargs):
         # Extract email and password from request data
@@ -134,7 +133,7 @@ class UserListView(ListAPIView):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     
 
 
@@ -146,7 +145,7 @@ class UserDetailView(RetrieveAPIView):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     lookup_field = 'pk'
 
 # User update view
@@ -187,7 +186,7 @@ class UserProfileListView(generics.ListCreateAPIView):
     """
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     
     def perform_create(self, serializer):
         # Automatically associate the logged-in user with the profile when creating
@@ -200,7 +199,7 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     """ 
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     lookup_field = 'pk'      
             
              
