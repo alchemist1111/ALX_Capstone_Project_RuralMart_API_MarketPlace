@@ -258,10 +258,11 @@ USE_X_FORWARDED_HOST = True
 # CORS_ALLOWED_ORIGINS = os.getenv('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',')
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
+    'TITLE': 'RuralMart API',
+    'DESCRIPTION': 'API documentation for RuralMart Marketplace',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    
     # OTHER SETTINGS
 }
 
