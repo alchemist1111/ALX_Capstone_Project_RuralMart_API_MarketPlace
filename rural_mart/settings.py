@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
     "database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com", 
     'localhost',
     '127.0.0.1',
+    'alx-capstone-project-ruralmart-api.onrender.com',
     ]
 
 
@@ -119,6 +120,7 @@ WSGI_APPLICATION = 'rural_mart.wsgi.application'
 #     }
 # }
 
+# Using SQLite for development and testing
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -245,7 +247,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:8000',
     'http://localhost:8000',  # Local testing
     'http://127.0.0.1:8000',
-    'https://alx-capstone-project-ruralmart-api-p5oh.onrender.com',
+    'https://alx-capstone-project-ruralmart-api.onrender.com',
     'https://database-1.c5ummqgoicx4.eu-north-1.rds.amazonaws.com',
     'https://ruralmart.pythonanywhere.com',
 ]
