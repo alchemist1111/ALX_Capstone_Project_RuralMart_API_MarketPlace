@@ -1,4 +1,3 @@
-```markdown
 # ALX-Capstone-Project-RuralMart-API-MarketPlace
 
 This is the backend API for the **RuralMart Marketplace**, built as part of the ALX Capstone project. The API provides endpoints to manage users, products, orders, payments, reviews, and other functionalities for a marketplace system aimed at rural communities.
